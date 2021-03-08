@@ -24,7 +24,7 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ZRender.h">
+    <ClInclude Include="Window.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Matrix.h">
@@ -36,15 +36,27 @@
     <ClInclude Include="global.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="geometry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ZRender.cpp">
+    <ClCompile Include="Window.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Matrix.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Vector3f.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="mian.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="model.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
