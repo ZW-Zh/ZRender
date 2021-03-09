@@ -73,4 +73,9 @@
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <Object Include="obj\african_head.obj">
+      <Filter>资源文件</Filter>
+    </Object>
+  </ItemGroup>
 </Project>

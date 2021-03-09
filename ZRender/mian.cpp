@@ -5,20 +5,10 @@
 #include <cassert>
 #include "geometry.h"
 #include "model.h"
+#include "global.h"
+#include "Triangle.h"
 
-const int width = 800;
-const int height = 600;
 
-static void set_color(unsigned char* framebuffer, int x, int y, unsigned char color[])
-{
-	
-	if (x >= width || x <= 0 || y >= height || y <= 0) return;
-	int i;
-	int index = ((height - y - 1) * width + x) * 4; // the origin for pixel is bottom-left, but the framebuffer index counts from top-left
-
-	for (i = 0; i < 3; i++)
-		framebuffer[index + i] = color[i];
-}
 
 void line(int x0, int y0, int x1, int y1, unsigned char* framebuffer, unsigned char color[]) {
 	/*for (float t = 0.; t < 1.; t += .1) {
@@ -73,12 +63,11 @@ void line(int x0, int y0, int x1, int y1, unsigned char* framebuffer, unsigned c
 int main() {
 
 	Model* model = new Model("obj/african_head.obj");
-
 	//帧缓冲
 	unsigned char* framebuffer = (unsigned char*)malloc(sizeof(unsigned char) * width * height * 4);
 	assert(framebuffer != nullptr);
 	memset(framebuffer, 0, sizeof(unsigned char) * width * height * 4);
-	std::cout << sizeof(unsigned char) * width * height * 4;
+
 	window_init(width, height);
 	int num_frames = 0;
 	float print_time = platform_get_time();
@@ -98,7 +87,8 @@ int main() {
 		unsigned char color[] = { 255,0,0 };
 		//画线
 		//line(10, 10, 400, 300, framebuffer, color);
-		for (int i = 0; i < model->nfaces(); i++) {
+		//模型连线
+		/*for (int i = 0; i < model->nfaces(); i++) {
 			std::vector<int> face = model->face(i);
 			for (int j = 0; j < 3; j++) {
 				Vec3f v0 = model->vert(face[j]);
@@ -109,7 +99,47 @@ int main() {
 				int y1 = (v1.y + 1.) * height / 2.;
 				line(x0, y0, x1, y1, framebuffer, color);
 			}
+		}*/
+		//画三角形
+		/*Vec2i pts[3] = { Vec2i(10,10), Vec2i(100, 30), Vec2i(190, 160) };
+		Triangle t(pts);
+		t.drawTriangle(framebuffer, color);*/
+		//模型填充
+		//for (int i = 0; i < model->nfaces(); i++) {
+		//	std::vector<int> face = model->face(i);
+		//	Vec2i screen_coords[3];
+		//	for (int j = 0; j < 3; j++) {
+		//		Vec3f world_coords = model->vert(face[j]);
+		//		//world_coords (-1,1)
+		//		screen_coords[j] = Vec2i((world_coords.x + 1.) * width / 2., (world_coords.y + 1.) * height / 2.);
+		//	}
+		//	unsigned char color[] = { rand() % 255, rand() % 255, rand() % 255, 255 };
+		//	Triangle t(screen_coords[0], screen_coords[1], screen_coords[2]);
+		//	t.drawTriangle(framebuffer, color);
+		//}
+		//加入光照
+		Vec3f light_dir(0, 0, -1);
+		for (int i = 0; i < model->nfaces(); i++) {
+			std::vector<int> face = model->face(i);
+			Vec2i screen_coords[3];
+			Vec3f world_coords[3];
+			for (int j = 0; j < 3; j++) {
+				Vec3f v = model->vert(face[j]);
+				screen_coords[j] = Vec2i((v.x + 1.) * width / 2., (v.y + 1.) * height / 2.);
+				world_coords[j] = v;
+			}
+			//法线
+			Vec3f n = (world_coords[2] - world_coords[0]) ^ (world_coords[1] - world_coords[0]);
+			n.normalize();
+			//夹角
+			float intensity = n * light_dir;
+			if (intensity > 0) {
+				unsigned char color[] = { intensity * 255, intensity * 255, intensity * 255, 255 };
+				Triangle t(screen_coords[0], screen_coords[1], screen_coords[2]);
+				t.drawTriangle(framebuffer, color);
+			}
 		}
+		//此时模型的嘴被口腔覆盖了，没有做深度测试。
 		// send framebuffer to window 
 		window_draw(framebuffer);
 		msg_dispatch();

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 
+//废案，留作纪念，写的太烂
 class Vector3f
 {
 public:
