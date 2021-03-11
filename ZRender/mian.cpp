@@ -7,7 +7,7 @@
 #include "model.h"
 #include "global.h"
 #include "Triangle.h"
-
+#include <limits>
 
 
 void line(int x0, int y0, int x1, int y1, unsigned char* framebuffer, unsigned char color[]) {
@@ -67,6 +67,10 @@ int main() {
 	unsigned char* framebuffer = (unsigned char*)malloc(sizeof(unsigned char) * width * height * 4);
 	assert(framebuffer != nullptr);
 	memset(framebuffer, 0, sizeof(unsigned char) * width * height * 4);
+	//深度缓冲
+	float* zbuffer = new float[width * height];
+	//初始化
+	for (int i = width * height; i--; zbuffer[i] = -(std::numeric_limits<float>::max)());
 
 	window_init(width, height);
 	int num_frames = 0;
@@ -121,11 +125,13 @@ int main() {
 		Vec3f light_dir(0, 0, -1);
 		for (int i = 0; i < model->nfaces(); i++) {
 			std::vector<int> face = model->face(i);
-			Vec2i screen_coords[3];
+			Vec3f screen_coords[3];
 			Vec3f world_coords[3];
 			for (int j = 0; j < 3; j++) {
 				Vec3f v = model->vert(face[j]);
-				screen_coords[j] = Vec2i((v.x + 1.) * width / 2., (v.y + 1.) * height / 2.);
+				//世界坐标转屏幕坐标
+				//[-1,1]
+				screen_coords[j] = Vec3f((v.x + 1.) * width / 2. + .5, (v.y + 1.) * height / 2. + .5, v.z);
 				world_coords[j] = v;
 			}
 			//法线
@@ -136,7 +142,7 @@ int main() {
 			if (intensity > 0) {
 				unsigned char color[] = { intensity * 255, intensity * 255, intensity * 255, 255 };
 				Triangle t(screen_coords[0], screen_coords[1], screen_coords[2]);
-				t.drawTriangle(framebuffer, color);
+				t.drawTriangle(framebuffer, zbuffer,color);
 			}
 		}
 		//此时模型的嘴被口腔覆盖了，没有做深度测试。
@@ -144,7 +150,7 @@ int main() {
 		window_draw(framebuffer);
 		msg_dispatch();
 	}
-	
+
 	free(framebuffer);
 	window_destroy();
 

@@ -26,18 +26,27 @@
 //}
 
 
-void Triangle::drawTriangle(unsigned char* framebuffer, unsigned char color[]) const
+void Triangle::drawTriangle(unsigned char* framebuffer, float* zbuffer,unsigned char color[]) const
 {
     const Triangle& pts = *this;
-    int min_x = std::max(0, std::min(std::min(pts[0][0], pts[1][0]), pts[2][0]));
-    int max_x = std::min(width - 1, std::max(std::max(pts[0][0], pts[1][0]), pts[2][0]));
-    int min_y = std::max(0, std::min(std::min(pts[0][1], pts[1][1]), pts[2][1]));
-    int max_y = std::min(height - 1, std::max(std::max(pts[0][1], pts[1][1]), pts[2][1]));
+    int min_x = std::max(0.f, std::min(std::min(pts[0][0], pts[1][0]), pts[2][0]));
+    int max_x = std::min(width - 1.f, std::max(std::max(pts[0][0], pts[1][0]), pts[2][0]));
+    int min_y = std::max(0.f, std::min(std::min(pts[0][1], pts[1][1]), pts[2][1]));
+    int max_y = std::min(height - 1.f, std::max(std::max(pts[0][1], pts[1][1]), pts[2][1]));
     for (int i = min_x; i <= max_x; i++) {
         for (int j = min_y; j <= max_y; j++) {
             Vec3f bc = barycentric(Vec2i(i, j));
+            //坐标在三角形外
             if (bc.x < 0 || bc.y < 0 || bc.z < 0) continue;
-            set_color(framebuffer, i, j, color);
+
+            //set_color(framebuffer, i, j, color);
+            //加入计算深度
+            float z = 0;
+            for (int k = 0; k < 3; k++) z += pts[k][2] * bc[k];
+            if (zbuffer[int(i + j * width)] < z) {
+                zbuffer[int(i + j * width)] = z;
+                set_color(framebuffer, i, j, color);
+            }
         }
     }
 }
