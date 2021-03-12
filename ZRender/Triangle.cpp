@@ -26,13 +26,14 @@
 //}
 
 
-void Triangle::drawTriangle(unsigned char* framebuffer, float* zbuffer,unsigned char color[]) const
+void Triangle::drawTriangle(unsigned char* framebuffer, TGAImage& image,float* zbuffer,unsigned char color[]) const
 {
+    //屏幕空间包围盒
     const Triangle& pts = *this;
-    int min_x = std::max(0.f, std::min(std::min(pts[0][0], pts[1][0]), pts[2][0]));
-    int max_x = std::min(width - 1.f, std::max(std::max(pts[0][0], pts[1][0]), pts[2][0]));
-    int min_y = std::max(0.f, std::min(std::min(pts[0][1], pts[1][1]), pts[2][1]));
-    int max_y = std::min(height - 1.f, std::max(std::max(pts[0][1], pts[1][1]), pts[2][1]));
+    float min_x = std::min(std::min(pts[0].s_v.x, pts[1].s_v.x), pts[2].s_v.x);
+    float max_x = std::max(std::max(pts[0].s_v.x, pts[1].s_v.x), pts[2].s_v.x);
+    float min_y = std::min(std::min(pts[0].s_v.y, pts[1].s_v.y), pts[2].s_v.y);
+    float max_y = std::max(std::max(pts[0].s_v.y, pts[1].s_v.y), pts[2].s_v.y);
     for (int i = min_x; i <= max_x; i++) {
         for (int j = min_y; j <= max_y; j++) {
             Vec3f bc = barycentric(Vec2i(i, j));
@@ -41,24 +42,73 @@ void Triangle::drawTriangle(unsigned char* framebuffer, float* zbuffer,unsigned 
 
             //set_color(framebuffer, i, j, color);
             //加入计算深度
+            //加入材质
             float z = 0;
-            for (int k = 0; k < 3; k++) z += pts[k][2] * bc[k];
+            TGAColor color;
+            //对世界坐标的深度值进行插值
+            
+            for (int k = 0; k < 3; k++)
+            {
+                z += pts[k].w_v.z * bc[k];
+                //对颜色插值，因为颜色获取是int,太糊了，改为对纹理坐标插值
+                //获取纹理坐标
+                
+                /*float x = image.get_width()-pts[k].t_v.x * image.get_width();
+                float y = image.get_height()-pts[k].t_v.y * image.get_height();*/
+               
+                //太糊了
+                /*color.r += image.get(x, y).r * bc[k];
+                color.g += image.get(x, y).g * bc[k];
+                color.b += image.get(x, y).b * bc[k];
+                color.a += image.get(x, y).a * bc[k];*/
+
+                //对坐标插值
+
+
+            }
             if (zbuffer[int(i + j * width)] < z) {
+                //更新深度
                 zbuffer[int(i + j * width)] = z;
+                float x=.0, y=.0;
+                //获取纹理
+                for (int k = 0; k < 3; k++)
+                {
+                    x +=  pts[k].t_v.x * bc[k];
+                    y +=  pts[k].t_v.y * bc[k];
+                }
+                x = x * image.get_width();
+                y = image.get_height() - y * image.get_height();
+                TGAColor color = image.get(x, y);
                 set_color(framebuffer, i, j, color);
             }
         }
     }
 }
-
+//二维三角形插值
 Vec3f Triangle::barycentric(Vec2i P) const
 {
     const Triangle& pts = *this;
     //叉乘
-    Vec3f u = cross(Vec3f(pts[2][0] - pts[0][0], pts[1][0] - pts[0][0], pts[0][0] - P[0]), Vec3f(pts[2][1] - pts[0][1], pts[1][1] - pts[0][1], pts[0][1] - P[1]));
+    Vec3f u = cross(Vec3f(pts[2].s_v.x - pts[0].s_v.x, pts[1].s_v.x - pts[0].s_v.x, pts[0].s_v.x - P[0]), Vec3f(pts[2].s_v.y - pts[0].s_v.y, pts[1].s_v.y - pts[0].s_v.y, pts[0].s_v.y - P[1]));
     /* `pts` and `P` has integer value as coordinates
        so `abs(u[2])` < 1 means `u[2]` is 0, that means
        triangle is degenerate, in this case return something with negative coordinates */
     if (std::abs(u[2]) < 1) return Vec3f(-1, 1, 1);
     return Vec3f(1.f - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z);
+
+    /*float x = P.x;
+    float y = P.y;
+    const Triangle& pts = *this;
+    float c1 = (x * (pts[1].w_v.y - pts[2].w_v.y) + (pts[2].w_v.x - pts[1].w_v.x) * y + pts[1].w_v.x * pts[2].w_v.y - pts[2].w_v.x * pts[1].w_v.y) /
+        (pts[0].w_v.x * (pts[1].w_v.y - pts[2].w_v.y) + (pts[2].w_v.x - pts[1].w_v.x) * pts[0].w_v.y + pts[1].w_v.x * pts[2].w_v.y -
+            pts[2].w_v.x * pts[1].w_v.y);
+    float c2 = (x * (pts[2].w_v.y - pts[0].w_v.y) + (pts[0].w_v.x - pts[2].w_v.x) * y + pts[2].w_v.x * pts[0].w_v.y - pts[0].w_v.x * pts[2].w_v.y) /
+        (pts[1].w_v.x * (pts[2].w_v.y - pts[0].w_v.y) + (pts[0].w_v.x - pts[2].w_v.x) * pts[1].w_v.y + pts[2].w_v.x * pts[0].w_v.y -
+            pts[0].w_v.x * pts[2].w_v.y);
+    float c3 = (x * (pts[0].w_v.y - pts[1].w_v.y) + (pts[1].w_v.x - pts[0].w_v.x) * y + pts[0].w_v.x * pts[1].w_v.y - pts[1].w_v.x * pts[0].w_v.y) /
+        (pts[2].w_v.x * (pts[0].w_v.y - pts[1].w_v.y) + (pts[1].w_v.x - pts[0].w_v.x) * pts[2].w_v.y + pts[0].w_v.x * pts[1].w_v.y -
+            pts[1].w_v.x * pts[0].w_v.y);
+    return { c1, c2, c3 };*/
 }
+
+//三维三角形插值

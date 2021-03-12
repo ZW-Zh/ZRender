@@ -42,6 +42,12 @@
     <ClInclude Include="model.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Triangle.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="tgaimage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Window.cpp">
@@ -59,6 +65,12 @@
     <ClCompile Include="model.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Triangle.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="tgaimage.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ZRender.rc">
@@ -72,10 +84,5 @@
     <Image Include="ZRender.ico">
       <Filter>资源文件</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="obj\african_head.obj">
-      <Filter>资源文件</Filter>
-    </Object>
   </ItemGroup>
 </Project>

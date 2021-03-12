@@ -150,6 +150,7 @@
     <ClInclude Include="model.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="tgaimage.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="Vector3f.h" />
     <ClInclude Include="Window.h" />
@@ -159,6 +160,7 @@
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="mian.cpp" />
     <ClCompile Include="model.cpp" />
+    <ClCompile Include="tgaimage.cpp" />
     <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="Vector3f.cpp" />
     <ClCompile Include="Window.cpp" />

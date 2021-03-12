@@ -8,9 +8,9 @@
 #include "global.h"
 #include "Triangle.h"
 #include <limits>
+#include "tgaimage.h"
 
-
-void line(int x0, int y0, int x1, int y1, unsigned char* framebuffer, unsigned char color[]) {
+void line(int x0, int y0, int x1, int y1, unsigned char* framebuffer, TGAColor color) {
 	/*for (float t = 0.; t < 1.; t += .1) {
 		int x = x0 + (x1 - x0) * t;
 		int y = y0 + (y1 - y0) * t;
@@ -63,6 +63,8 @@ void line(int x0, int y0, int x1, int y1, unsigned char* framebuffer, unsigned c
 int main() {
 
 	Model* model = new Model("obj/african_head.obj");
+	TGAImage texture;
+	texture.read_tga_file("obj/african_head_diffuse.tga");
 	//帧缓冲
 	unsigned char* framebuffer = (unsigned char*)malloc(sizeof(unsigned char) * width * height * 4);
 	assert(framebuffer != nullptr);
@@ -124,34 +126,41 @@ int main() {
 		//加入光照
 		Vec3f light_dir(0, 0, -1);
 		for (int i = 0; i < model->nfaces(); i++) {
-			std::vector<int> face = model->face(i);
+			std::vector<VertexIndex> face = model->face(i);
 			Vec3f screen_coords[3];
 			Vec3f world_coords[3];
 			for (int j = 0; j < 3; j++) {
-				Vec3f v = model->vert(face[j]);
+				Vec3f v = model->vert(face[j].v);
 				//世界坐标转屏幕坐标
 				//[-1,1]
-				screen_coords[j] = Vec3f((v.x + 1.) * width / 2. + .5, (v.y + 1.) * height / 2. + .5, v.z);
+				screen_coords[j] = Vec3f((v.x + 1.) * width / 2. - .5, (v.y + 1.) * height / 2. - .5, v.z);
 				world_coords[j] = v;
 			}
 			//法线
-			Vec3f n = (world_coords[2] - world_coords[0]) ^ (world_coords[1] - world_coords[0]);
+			Vec3f n = cross (world_coords[2] - world_coords[0],world_coords[1] - world_coords[0]);
 			n.normalize();
 			//夹角
 			float intensity = n * light_dir;
 			if (intensity > 0) {
 				unsigned char color[] = { intensity * 255, intensity * 255, intensity * 255, 255 };
-				Triangle t(screen_coords[0], screen_coords[1], screen_coords[2]);
-				t.drawTriangle(framebuffer, zbuffer,color);
+				Vertex v0(screen_coords[0], world_coords[0], model->texture_vert(face[0].t_v));
+				Vertex v1(screen_coords[1], world_coords[1], model->texture_vert(face[1].t_v));
+				Vertex v2(screen_coords[2], world_coords[2], model->texture_vert(face[2].t_v));
+				Triangle t(v0,v1,v2);
+			
+				t.drawTriangle(framebuffer,texture,zbuffer,color);
+
 			}
 		}
 		//此时模型的嘴被口腔覆盖了，没有做深度测试。
 		// send framebuffer to window 
 		window_draw(framebuffer);
+
 		msg_dispatch();
 	}
 
 	free(framebuffer);
+	delete model;
 	window_destroy();
 
 	system("pause");

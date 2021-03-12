@@ -7,14 +7,16 @@
 class Model {
 private:
 	std::vector<Vec3f> verts_;
-	std::vector<std::vector<int> > faces_;
+	std::vector<std::vector<VertexIndex> > faces_;
+	std::vector<Vec3f> texture_coords;
 public:
 	Model(const char *filename);
 	~Model();
 	int nverts();
 	int nfaces();
 	Vec3f vert(int i);
-	std::vector<int> face(int idx);
+	std::vector<VertexIndex> face(int idx);
+	Vec3f texture_vert(int i);
 };
 
 #endif //__MODEL_H__
