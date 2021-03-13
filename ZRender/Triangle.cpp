@@ -2,7 +2,6 @@
 #include "global.h"
 
 
-
 //old school，计算起始点，每行扫描插入，三角形水平分割为两部分
 //void triangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage& image, TGAColor color) {
 //    if (t0.y == t1.y && t0.y == t2.y) return; // I dont care about degenerate triangles 
@@ -52,34 +51,43 @@ void Triangle::drawTriangle(unsigned char* framebuffer, TGAImage& image,float* z
                 z += pts[k].w_v.z * bc[k];
                 //对颜色插值，因为颜色获取是int,太糊了，改为对纹理坐标插值
                 //获取纹理坐标
-                
                 /*float x = image.get_width()-pts[k].t_v.x * image.get_width();
                 float y = image.get_height()-pts[k].t_v.y * image.get_height();*/
-               
                 //太糊了
                 /*color.r += image.get(x, y).r * bc[k];
                 color.g += image.get(x, y).g * bc[k];
                 color.b += image.get(x, y).b * bc[k];
                 color.a += image.get(x, y).a * bc[k];*/
-
-                //对坐标插值
-
-
             }
             if (zbuffer[int(i + j * width)] < z) {
                 //更新深度
                 zbuffer[int(i + j * width)] = z;
-                float x=.0, y=.0;
-                //获取纹理
-                for (int k = 0; k < 3; k++)
-                {
-                    x +=  pts[k].t_v.x * bc[k];
-                    y +=  pts[k].t_v.y * bc[k];
+                
+                //float x=.0, y=.0;
+                ////对纹理坐标插值
+                //for (int k = 0; k < 3; k++)
+                //{
+                //    x +=  pts[k].t_v.x * bc[k];
+                //    y +=  pts[k].t_v.y * bc[k];
+                //}
+                //x = x * image.get_width();
+                //y = image.get_height() - y * image.get_height();
+                //TGAColor color = image.get(x, y);
+                //set_color(framebuffer, i, j, color);
+                
+                //Gouraud shading 
+                Vec3f light_dir(0, 0, 1);
+                //对顶点法线插值
+                //Vec3f norm_v = pts[0].norm_v * bc[0] + pts[1].norm_v * bc[1] + pts[2].norm_v * bc[2];
+                //norm_v.normalize();
+                
+                //float intensity = norm_v * light_dir;
+                float intensity = pts[0].norm_v[0] * bc[0] + pts[1].norm_v[1] * bc[1] + pts[2].norm_v[2] * bc[2];
+
+                if (intensity >= 0) {
+                    TGAColor color(intensity * 255, intensity * 255, intensity * 255, 255);
+                    set_color(framebuffer, i, j, color);
                 }
-                x = x * image.get_width();
-                y = image.get_height() - y * image.get_height();
-                TGAColor color = image.get(x, y);
-                set_color(framebuffer, i, j, color);
             }
         }
     }

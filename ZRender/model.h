@@ -8,7 +8,8 @@ class Model {
 private:
 	std::vector<Vec3f> verts_;
 	std::vector<std::vector<VertexIndex> > faces_;
-	std::vector<Vec3f> texture_coords;
+	std::vector<Vec2f> texture_coords;
+	std::vector<Vec3f> norms_;
 public:
 	Model(const char *filename);
 	~Model();
@@ -16,7 +17,9 @@ public:
 	int nfaces();
 	Vec3f vert(int i);
 	std::vector<VertexIndex> face(int idx);
-	Vec3f texture_vert(int i);
+	//根据索引获取纹理坐标
+	Vec2f texture_vert(int i);
+	Vec3f norm_vert(int i);
 };
 
 #endif //__MODEL_H__
