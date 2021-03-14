@@ -1,6 +1,7 @@
 ﻿#include <tchar.h>
 #include <cassert>
 #include "Window.h"
+
 // Global variables
 
 // The main window class name.
@@ -18,7 +19,13 @@ static LRESULT CALLBACK msg_callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
 	case WM_CLOSE:
 		window->is_close = 1;
 		break;
-
+	
+	case WM_LBUTTONDOWN:
+		window->mouse_info.orbit_pos = get_mouse_pos();
+		window->buttons[0] = 1; break;
+	case WM_LBUTTONUP:
+		window->buttons[0] = 0;
+		break;
 	default: return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 	return 0;
@@ -218,6 +225,14 @@ void window_draw(unsigned char* framebuffer)
 	window_display();
 }
 
+Vec2f get_mouse_pos()
+{
+	POINT point;
+	GetCursorPos(&point);
+	ScreenToClient(window->h_window, &point); // 从屏幕空间转到窗口空间
+	return Vec2f((float)point.x, (float)point.y);
+}
+
 
 /* misc platform functions */
 static double get_native_time(void) {
@@ -238,4 +253,10 @@ float platform_get_time(void) {
 		initial = get_native_time();
 	}
 	return (float)(get_native_time() - initial);
+}
+
+void window_reset()
+{
+	memset(window->window_fb, 0, window->width * window->height * 4);
+	window_display();
 }

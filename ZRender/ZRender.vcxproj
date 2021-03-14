@@ -144,6 +144,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="geometry.h" />
     <ClInclude Include="Matrix.h" />
@@ -157,6 +158,7 @@
     <ClInclude Include="global.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="mian.cpp" />
     <ClCompile Include="model.cpp" />

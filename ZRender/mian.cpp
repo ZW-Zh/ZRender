@@ -9,6 +9,7 @@
 #include "Triangle.h"
 #include <limits>
 #include "tgaimage.h"
+#include "Camera.h"
 
 void line(int x0, int y0, int x1, int y1, unsigned char* framebuffer, TGAColor color) {
 	/*for (float t = 0.; t < 1.; t += .1) {
@@ -60,9 +61,18 @@ void line(int x0, int y0, int x1, int y1, unsigned char* framebuffer, TGAColor c
 
 }
 
-//Matrix projection() {
-//
-//}
+Matrix projection(float fov,float aspect ,float n,float f) {
+	Matrix m;
+	m[0][0] = n;
+	m[1][1] = n;
+	m[2][2] = n + f;
+	m[3][3] = 0;
+	m[3][2] = 1;
+	m[2][3] = -n * f;
+	Matrix m1;
+	
+	return m;
+}
 
 
 
@@ -71,33 +81,33 @@ Matrix viewport(int x, int y, int w, int h) {
 	Matrix m = Matrix::identity();
 	m[0][3] = x + w / 2.f;
 	m[1][3] = y + h / 2.f;
-	//m[2][3] = depth / 2.f;
+	m[2][3] = depth / 2.f;
 
 	m[0][0] = w / 2.f;
 	m[1][1] = h / 2.f;
-	//m[2][2] = depth / 2.f;
+	m[2][2] = depth / 2.f;
 	return m;
 }
 
-//相机位置，朝向，向上的向量
-Matrix lookat(Vec3f eye, Vec3f center, Vec3f up) {
-	//看向模型的向量
-	Vec3f z = (eye - center).normalize();
-	
-	Vec3f x = cross(up,z).normalize();
-	//up
-	Vec3f y = cross(z,x).normalize();
-	//单位矩阵
-	Matrix res = Matrix::identity();
-	for (int i = 0; i < 3; i++) {
-		res[0][i] = x[i];
-		res[1][i] = y[i];
-		res[2][i] = -z[i];
-		//相机中心平移
-		res[i][3] = -center[i];
-	}
-	return res;
-}
+////相机位置，朝向，向上的向量，转换到标准坐标系
+//Matrix lookat(Vec3f eye, Vec3f center, Vec3f up) {
+//	//看向模型的向量
+//	Vec3f z = (eye - center).normalize();
+//	
+//	Vec3f x = cross(up,z).normalize();
+//	//up
+//	Vec3f y = cross(z,x).normalize();
+//	//单位矩阵
+//	Matrix res = Matrix::identity();
+//	for (int i = 0; i < 3; i++) {
+//		res[0][i] = x[i];
+//		res[1][i] = y[i];
+//		res[2][i] = z[i];
+//		//相机中心平移
+//		res[i][3] = -center[i];
+//	}
+//	return res;
+//}
 
 int main() {
 
@@ -113,30 +123,26 @@ int main() {
 	//初始化
 	for (int i = width * height; i--; zbuffer[i] = (std::numeric_limits<float>::min)());
 
-	
 	Vec3f light_dir = Vec3f(1, -1, 1).normalize();
 	Vec3f eye(1, 1, 3);
 	Vec3f center(0, 0, 0);
 
-	//模型变换
-	Matrix ModelView = lookat(eye, center, Vec3f(0, 1, 0));
-	Matrix Projection = Matrix::identity();
-	Matrix ViewPort = viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
-	Projection[3][2] = -1.f / (eye - center).norm();
-
-	std::cerr << ModelView << std::endl;
+	Camera c(eye, center, Vec3f(0, 1, 0), 0);
+	
+	/*std::cerr << ModelView << std::endl;
 	std::cerr << Projection << std::endl;
 	std::cerr << ViewPort << std::endl;
 	Matrix z = (ViewPort * Projection * ModelView);
-	std::cerr << z << std::endl;
-
+	std::cerr << z << std::endl;*/
 
 	//创建窗口
 	window_init(width, height);
 	int num_frames = 0;
 	float print_time = platform_get_time();
+
 	while (!window->is_close)
 	{
+		
 		float curr_time = platform_get_time();
 		// calculate and display FPS
 		num_frames += 1;
@@ -149,6 +155,17 @@ int main() {
 
 		}
 		unsigned char color[] = { 255,0,0 };
+
+		//模型变换
+		Matrix ModelView = c.lookat();
+		Matrix Projection = projection(-0.1,-10000);
+		//Matrix Projection = Matrix::identity();
+		Matrix ViewPort = viewport(0,0, width , height );
+		//Projection[3][2] = -1.f / (eye - center).norm();
+
+		//处理鼠标事件
+		handle_mouse_events(c);
+
 		//画线
 		//line(10, 10, 400, 300, framebuffer, color);
 		//模型连线
@@ -192,10 +209,10 @@ int main() {
 				Vec3f v = model->vert(face[j].v);
 				//世界坐标转屏幕坐标
 				//[-1,1]
-				// 忽略z
+				//保留世界坐标z
 				//screen_coords[j] = Vec3f((v.x + 1.) * width / 2. - .5, (v.y + 1.) * height / 2. - .5, v.z);
 			
-				
+				//深度变换了
 				screen_coords[j] = castVec3(ViewPort * Projection * ModelView * Vec4f(v,1));
 				world_coords[j] = v;
 				intensity[j] = model->norm_vert(face[j].norm_v) * light_dir;

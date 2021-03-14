@@ -2,8 +2,10 @@
 #ifndef _GLOBAL_
 #define _GLOBAL_
 #include "tgaimage.h"
-static const int width = 1000;
-static const int height = 1000;
+#define PI 3.1415926
+static const int width = 800;
+static const int height = 800;
+static const int depth = 255;
 
 
 static void set_color(unsigned char* framebuffer, int x, int y, const TGAColor color)

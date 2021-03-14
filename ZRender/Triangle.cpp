@@ -48,7 +48,8 @@ void Triangle::drawTriangle(unsigned char* framebuffer, TGAImage& image,float* z
             
             for (int k = 0; k < 3; k++)
             {
-                z += pts[k].w_v.z * bc[k];
+                //屏幕空间的z保留的世界坐标下的z
+                z += pts[k].s_v.z * bc[k];
                 //对颜色插值，因为颜色获取是int,太糊了，改为对纹理坐标插值
                 //获取纹理坐标
                 /*float x = image.get_width()-pts[k].t_v.x * image.get_width();
