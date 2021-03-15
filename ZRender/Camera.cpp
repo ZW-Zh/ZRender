@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "global.h"
 
+//模型位置世界坐标转换到观察坐标
 Matrix Camera::lookat() {
 	//看向模型的向量
 	Vec3f z = (pos - target).normalize();
@@ -15,9 +16,12 @@ Matrix Camera::lookat() {
 		res[0][i] = x[i];
 		res[1][i] = y[i];
 		res[2][i] = z[i];
-		//相机中心平移
-		res[i][3] = -target[i];
 	}
+	//相机中心平移
+	res[0][3] = -pos * x ;
+	res[1][3] = -pos * y;
+	res[2][3] = -pos * z;
+
 	return res;
 }
 
@@ -49,24 +53,43 @@ void updata_camera_pos(Camera& camera)
 	float phi = (float)atan2(from_target[0], from_target[2]); // azimuth angle(方位角), angle between from_target and z-axis，[-pi, pi]
 	//垂直旋转角
 	float theta = (float)asin(from_target[1] / distance);		  // zenith angle(天顶角), angle between from_target and y-axis, [0, pi]
-	//鼠标在x,y上移动的距离
+	//鼠标在x,y上移动的距离,往左和上划是正的，
 	float x_delta = window->mouse_info.orbit_delta[0] / window->width;
 	float y_delta = window->mouse_info.orbit_delta[1] / window->height;
 
-	// for mouse wheel
-	distance *= (float)pow(0.95, window->mouse_info.wheel_delta);
+	std::cout << "x:" << x_delta << std::endl;
 
+	std::cout << "phi1:" << phi * 180 / PI << std::endl;
 	//加上位移的
 	float factor = 1.5 * PI;
 	// for mouse left button
-	phi += x_delta * factor;
-	theta += y_delta * factor;
-	if (theta > PI) theta = PI - 1e-5f * 100;
-	if (theta < 0)  theta = 1e-5f * 100;
+	phi += x_delta * 360  * PI / 180;
+	theta += y_delta * 360 * PI / 180;
 
-	camera.pos[0] = camera.target[0] + distance * sin(phi) * sin(theta);
-	camera.pos[1] = camera.target[1] + distance * cos(theta);
-	camera.pos[2] = camera.target[2] + distance * sin(theta) * cos(phi);
+	//处理精度问题
+	if (phi > PI) phi = PI / 2 - 1e-3f;
+	if (phi < -PI)  phi = -PI + 1e-3f;
+
+	std::cout << "phi2:" << phi * 180 / PI << std::endl;
+	
+	camera.pos[0] = camera.target[0] + distance * sin(phi);
+	camera.pos[2] = camera.target[2] + distance * cos(phi);
+
+	std::cout << camera.pos <<std::endl;
+	//// for mouse wheel
+	//distance *= (float)pow(0.95, window->mouse_info.wheel_delta);
+
+	////加上位移的
+	//float factor = 1.5 * PI;
+	//// for mouse left button
+	//phi += x_delta * factor;
+	//theta += y_delta * factor;
+	//if (theta > PI) theta = PI - 1e-5f * 100;
+	//if (theta < 0)  theta = 1e-5f * 100;
+
+	//camera.pos[0] = camera.target[0] + distance * sin(phi) * sin(theta);
+	//camera.pos[1] = camera.target[1] + distance * cos(theta);
+	//camera.pos[2] = camera.target[2] + distance * sin(theta) * cos(phi);
 	
 
 }
@@ -78,9 +101,11 @@ void handle_mouse_events(Camera& camera)
 		
 		Vec2f cur_pos = get_mouse_pos();
 		window->mouse_info.orbit_delta = window->mouse_info.orbit_pos - cur_pos;
+		//std::cout << window->mouse_info.orbit_delta<<std::endl;
 		window->mouse_info.orbit_pos = cur_pos;
+				
 		updata_camera_pos(camera);
-		window_reset();
+		//window_reset();
 	}
 }
 

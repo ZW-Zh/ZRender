@@ -71,6 +71,11 @@ template<size_t DIM, typename T>vec<DIM, T> operator-(vec<DIM, T> lhs, const vec
 	return lhs;
 }
 
+template<size_t DIM, typename T>vec<DIM, T> operator-(vec<DIM, T> lhs) {
+	for (size_t i = DIM; i--; lhs[i] = -lhs[i]);
+	return lhs;
+}
+
 template<size_t DIM, typename T, typename U> vec<DIM, T> operator*(vec<DIM, T> lhs, const U& rhs) {
 	for (size_t i = DIM; i--; lhs[i] *= rhs);
 	return lhs;

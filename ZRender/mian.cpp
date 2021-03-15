@@ -10,6 +10,7 @@
 #include <limits>
 #include "tgaimage.h"
 #include "Camera.h"
+#include <cmath>
 
 void line(int x0, int y0, int x1, int y1, unsigned char* framebuffer, TGAColor color) {
 	/*for (float t = 0.; t < 1.; t += .1) {
@@ -61,17 +62,44 @@ void line(int x0, int y0, int x1, int y1, unsigned char* framebuffer, TGAColor c
 
 }
 
-Matrix projection(float fov,float aspect ,float n,float f) {
+Matrix projection(float fovY,float aspect ,float n,float f) {
+	fovY = fovY / 180.0 * PI;
+	float t = std::tan(fovY / 2) * std::abs(n);
+	float b = -t;
+	float r = aspect * t;
+	float l = -r;
+
+	Matrix m1 = Matrix::identity();
+	m1[0][0] = 2 / (r - l);
+	m1[1][1] = 2 / (t - b);
+	m1[2][2] = 2 / (n - f);
+
+	Matrix m2 = Matrix::identity();
+	m2[0][3] = -(r + l) / 2;
+	m2[1][3] = -(t + b) / 2;
+	m2[2][3] = -(n + f) / 2;
+
 	Matrix m;
 	m[0][0] = n;
 	m[1][1] = n;
 	m[2][2] = n + f;
 	m[3][3] = 0;
 	m[3][2] = 1;
-	m[2][3] = -n * f;
-	Matrix m1;
+	m[2][3] = - (n * f);
 	
-	return m;
+	/*Matrix m = Matrix::identity();
+	fov = fov / 180.0 * PI;
+	float t = fabs(near) * tan(fovy / 2);
+	float r = aspect * t;
+
+	m[0][0] = near / r;
+	m[1][1] = near / t;
+	m[2][2] = (near + far) / (near - far);
+	m[2][3] = 2 * near * far / (far - near);
+	m[3][2] = 1;
+	m[3][3] = 0;
+	return m;*/
+	return m1 * m2 * m;
 }
 
 
@@ -79,8 +107,8 @@ Matrix projection(float fov,float aspect ,float n,float f) {
 //视口变换[-1,1]^3->[0,width]*[0,height]
 Matrix viewport(int x, int y, int w, int h) {
 	Matrix m = Matrix::identity();
-	m[0][3] = x + w / 2.f;
-	m[1][3] = y + h / 2.f;
+	m[0][3] = w / 2.f;
+	m[1][3] = h / 2.f;
 	m[2][3] = depth / 2.f;
 
 	m[0][0] = w / 2.f;
@@ -89,25 +117,27 @@ Matrix viewport(int x, int y, int w, int h) {
 	return m;
 }
 
-////相机位置，朝向，向上的向量，转换到标准坐标系
-//Matrix lookat(Vec3f eye, Vec3f center, Vec3f up) {
-//	//看向模型的向量
-//	Vec3f z = (eye - center).normalize();
-//	
-//	Vec3f x = cross(up,z).normalize();
-//	//up
-//	Vec3f y = cross(z,x).normalize();
-//	//单位矩阵
-//	Matrix res = Matrix::identity();
-//	for (int i = 0; i < 3; i++) {
-//		res[0][i] = x[i];
-//		res[1][i] = y[i];
-//		res[2][i] = z[i];
-//		//相机中心平移
-//		res[i][3] = -center[i];
-//	}
-//	return res;
-//}
+void clear_zbuffer(int width, int height, float* zbuffer)
+{
+	for (int i = 0; i < width * height; i++)
+		zbuffer[i] = -100000;
+}
+
+void clear_framebuffer(int width, int height, unsigned char* framebuffer)
+{
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			int index = (i * width + j) * 4;
+
+			framebuffer[index + 2] = 80;
+			framebuffer[index + 1] = 56;
+			framebuffer[index] = 56;
+		}
+	}
+}
+
 
 int main() {
 
@@ -124,16 +154,12 @@ int main() {
 	for (int i = width * height; i--; zbuffer[i] = (std::numeric_limits<float>::min)());
 
 	Vec3f light_dir = Vec3f(1, -1, 1).normalize();
-	Vec3f eye(1, 1, 3);
+	Vec3f eye(0, 0, 3);
 	Vec3f center(0, 0, 0);
+	Vec3f up(0, 1, 0);
 
-	Camera c(eye, center, Vec3f(0, 1, 0), 0);
+	Camera c(eye, center, up, 0);
 	
-	/*std::cerr << ModelView << std::endl;
-	std::cerr << Projection << std::endl;
-	std::cerr << ViewPort << std::endl;
-	Matrix z = (ViewPort * Projection * ModelView);
-	std::cerr << z << std::endl;*/
 
 	//创建窗口
 	window_init(width, height);
@@ -142,7 +168,11 @@ int main() {
 
 	while (!window->is_close)
 	{
-		
+
+		// clear buffer
+		clear_framebuffer(width, height, framebuffer);
+		clear_zbuffer(width, height, zbuffer);
+
 		float curr_time = platform_get_time();
 		// calculate and display FPS
 		num_frames += 1;
@@ -158,13 +188,26 @@ int main() {
 
 		//模型变换
 		Matrix ModelView = c.lookat();
-		Matrix Projection = projection(-0.1,-10000);
+		Matrix Projection = projection(60, width/height,-0.1,-10000);
 		//Matrix Projection = Matrix::identity();
 		Matrix ViewPort = viewport(0,0, width , height );
 		//Projection[3][2] = -1.f / (eye - center).norm();
 
+		/*std::cerr << ModelView << std::endl;
+		std::cerr << Projection << std::endl;
+		std::cerr << ViewPort << std::endl;
+		Matrix z = (ViewPort * Projection * ModelView);
+		std::cerr << z << std::endl;*/
+
+		float radius = 3.0f;
+		float camX = sin(platform_get_time()) * radius;
+		float camZ = cos(platform_get_time()) * radius;
+
+		c.pos[0] = camX;
+		c.pos[2] = camZ;
+		std::cout << c.pos << std::endl;
 		//处理鼠标事件
-		handle_mouse_events(c);
+		//handle_mouse_events(c);
 
 		//画线
 		//line(10, 10, 400, 300, framebuffer, color);
@@ -213,7 +256,7 @@ int main() {
 				//screen_coords[j] = Vec3f((v.x + 1.) * width / 2. - .5, (v.y + 1.) * height / 2. - .5, v.z);
 			
 				//深度变换了
-				screen_coords[j] = castVec3(ViewPort * Projection * ModelView * Vec4f(v,1));
+				screen_coords[j] = castVec3( ViewPort * Projection * ModelView * Vec4f(v,1));
 				world_coords[j] = v;
 				intensity[j] = model->norm_vert(face[j].norm_v) * light_dir;
 			}
@@ -238,8 +281,8 @@ int main() {
 		}
 		//此时模型的嘴被口腔覆盖了，没有做深度测试。
 		// send framebuffer to window 
+		
 		window_draw(framebuffer);
-
 		msg_dispatch();
 	}
 

@@ -29,10 +29,10 @@ void Triangle::drawTriangle(unsigned char* framebuffer, TGAImage& image,float* z
 {
     //屏幕空间包围盒
     const Triangle& pts = *this;
-    float min_x = std::min(std::min(pts[0].s_v.x, pts[1].s_v.x), pts[2].s_v.x);
-    float max_x = std::max(std::max(pts[0].s_v.x, pts[1].s_v.x), pts[2].s_v.x);
-    float min_y = std::min(std::min(pts[0].s_v.y, pts[1].s_v.y), pts[2].s_v.y);
-    float max_y = std::max(std::max(pts[0].s_v.y, pts[1].s_v.y), pts[2].s_v.y);
+    float min_x = std::max(0.f,std::min(std::min(pts[0].s_v.x, pts[1].s_v.x), pts[2].s_v.x));
+    float max_x = std::min((float)width,std::max(std::max(pts[0].s_v.x, pts[1].s_v.x), pts[2].s_v.x));
+    float min_y = std::max(0.f, std::min(std::min(pts[0].s_v.y, pts[1].s_v.y), pts[2].s_v.y));
+    float max_y = std::min((float)height, std::max(std::max(pts[0].s_v.y, pts[1].s_v.y), pts[2].s_v.y));
     for (int i = min_x; i <= max_x; i++) {
         for (int j = min_y; j <= max_y; j++) {
             Vec3f bc = barycentric(Vec2i(i, j));
@@ -64,31 +64,31 @@ void Triangle::drawTriangle(unsigned char* framebuffer, TGAImage& image,float* z
                 //更新深度
                 zbuffer[int(i + j * width)] = z;
                 
-                //float x=.0, y=.0;
-                ////对纹理坐标插值
-                //for (int k = 0; k < 3; k++)
-                //{
-                //    x +=  pts[k].t_v.x * bc[k];
-                //    y +=  pts[k].t_v.y * bc[k];
-                //}
-                //x = x * image.get_width();
-                //y = image.get_height() - y * image.get_height();
-                //TGAColor color = image.get(x, y);
-                //set_color(framebuffer, i, j, color);
+                float x=.0, y=.0;
+                //对纹理坐标插值
+                for (int k = 0; k < 3; k++)
+                {
+                    x +=  pts[k].t_v.x * bc[k];
+                    y +=  pts[k].t_v.y * bc[k];
+                }
+                x = x * image.get_width();
+                y = image.get_height() - y * image.get_height();
+                TGAColor color = image.get(x, y);
+                set_color(framebuffer, i, j, color);
                 
                 //Gouraud shading 
-                Vec3f light_dir(0, 0, 1);
+                //Vec3f light_dir(0, 0, 1);
                 //对顶点法线插值
                 //Vec3f norm_v = pts[0].norm_v * bc[0] + pts[1].norm_v * bc[1] + pts[2].norm_v * bc[2];
                 //norm_v.normalize();
                 
                 //float intensity = norm_v * light_dir;
-                float intensity = pts[0].norm_v[0] * bc[0] + pts[1].norm_v[1] * bc[1] + pts[2].norm_v[2] * bc[2];
+                //float intensity = pts[0].norm_v[0] * bc[0] + pts[1].norm_v[1] * bc[1] + pts[2].norm_v[2] * bc[2];
 
-                if (intensity >= 0) {
+                /*if (intensity >= 0) {
                     TGAColor color(intensity * 255, intensity * 255, intensity * 255, 255);
                     set_color(framebuffer, i, j, color);
-                }
+                }*/
             }
         }
     }

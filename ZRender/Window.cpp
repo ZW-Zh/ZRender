@@ -157,10 +157,19 @@ int window_destroy()
 {
 	if (window->mem_dc)
 	{
+		if (window->bm_old)
+		{
+			SelectObject(window->mem_dc, window->bm_old); // 写入原来的bitmap，才能释放DC！
+			window->bm_old = NULL;
+		}
 		DeleteDC(window->mem_dc);
 		window->mem_dc = NULL;
 	}
-
+	if (window->bm_dib)
+	{
+		DeleteObject(window->bm_dib);
+		window->bm_dib = NULL;
+	}
 	if (window->h_window)
 	{
 		CloseWindow(window->h_window);
@@ -230,6 +239,7 @@ Vec2f get_mouse_pos()
 	POINT point;
 	GetCursorPos(&point);
 	ScreenToClient(window->h_window, &point); // 从屏幕空间转到窗口空间
+	if (point.x > window->width || point.x < 0 || point.y>window->height || point.y < 0) return Vec2f();
 	return Vec2f((float)point.x, (float)point.y);
 }
 
