@@ -7,9 +7,9 @@ ZRender is a toy software rasterization application on Windows platform，just f
 * depth testing
 
 # output
-
-![](ZRender\output\texture-mapping.png)
-
-![](ZRender\output\transform.png)
-
-![](ZRender\output\gouraud-shading.png)
+## texture-mapping
+![](https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/texture-mapping.png)
+## transformation
+![](https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/transform.png)
+## gouraud-shading
+![](https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/gouraud-shading.png)
