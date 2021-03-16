@@ -39,7 +39,6 @@ Vec3f rotate(Vec3f axis,Vec3f v, float radius) {
 	m[2][0] = axis.x * axis.z * (1 - c) - axis.y * s;
 	m[2][1] = axis.y * axis.z * (1 - c) + axis.x * s;
 	m[2][2] = axis.z * axis.z * (1 - c) + c;
-	
 	return m * v;
 }
 
@@ -57,40 +56,26 @@ void updata_camera_pos(Camera& camera)
 	float x_delta = window->mouse_info.orbit_delta[0] / window->width;
 	float y_delta = window->mouse_info.orbit_delta[1] / window->height;
 
-	std::cout << "x:" << x_delta << std::endl;
-
-	std::cout << "phi1:" << phi * 180 / PI << std::endl;
+	// for mouse wheel
+	distance *= pow(0.95, window->mouse_info.wheel_delta);
+	 
 	//加上位移的
 	float factor = 1.5 * PI;
 	// for mouse left button
 	phi += x_delta * 360  * PI / 180;
 	theta += y_delta * 360 * PI / 180;
-
+	
 	//处理精度问题
-	if (phi > PI) phi = PI / 2 - 1e-3f;
-	if (phi < -PI)  phi = -PI + 1e-3f;
+	if (phi > PI) phi = -PI + 1e-3f;
+	if (phi < -PI)  phi = PI - 1e-3f;
 
-	std::cout << "phi2:" << phi * 180 / PI << std::endl;
-	
-	camera.pos[0] = camera.target[0] + distance * sin(phi);
-	camera.pos[2] = camera.target[2] + distance * cos(phi);
+	if (theta > PI / 2) theta = PI / 2;
+	if (theta < -PI / 2)  theta = -PI/2;
 
-	std::cout << camera.pos <<std::endl;
-	//// for mouse wheel
-	//distance *= (float)pow(0.95, window->mouse_info.wheel_delta);
-
-	////加上位移的
-	//float factor = 1.5 * PI;
-	//// for mouse left button
-	//phi += x_delta * factor;
-	//theta += y_delta * factor;
-	//if (theta > PI) theta = PI - 1e-5f * 100;
-	//if (theta < 0)  theta = 1e-5f * 100;
-
-	//camera.pos[0] = camera.target[0] + distance * sin(phi) * sin(theta);
-	//camera.pos[1] = camera.target[1] + distance * cos(theta);
-	//camera.pos[2] = camera.target[2] + distance * sin(theta) * cos(phi);
-	
+	//先水平旋转在垂直旋转，x和z都会变
+	camera.pos[1] = camera.target[1] + distance * sin(theta);
+	camera.pos[0] = camera.target[0] + distance * cos(theta) * sin(phi);
+	camera.pos[2] = camera.target[2] + distance * cos(theta) * cos(phi);
 
 }
 
@@ -98,14 +83,14 @@ void handle_mouse_events(Camera& camera)
 {
 	if (window->buttons[0])
 	{
-		
 		Vec2f cur_pos = get_mouse_pos();
 		window->mouse_info.orbit_delta = window->mouse_info.orbit_pos - cur_pos;
-		//std::cout << window->mouse_info.orbit_delta<<std::endl;
 		window->mouse_info.orbit_pos = cur_pos;
-				
 		updata_camera_pos(camera);
-		//window_reset();
+	}
+	if (window->mouse_info.wheel_delta != 0) {
+		updata_camera_pos(camera);
+		window->mouse_info.wheel_delta = 0;
 	}
 }
 

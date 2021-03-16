@@ -26,6 +26,9 @@ static LRESULT CALLBACK msg_callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
 	case WM_LBUTTONUP:
 		window->buttons[0] = 0;
 		break;
+	case WM_MOUSEWHEEL:
+		window->mouse_info.wheel_delta = GET_WHEEL_DELTA_WPARAM(wParam) / (float)WHEEL_DELTA;
+		break;
 	default: return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 	return 0;
@@ -263,10 +266,4 @@ float platform_get_time(void) {
 		initial = get_native_time();
 	}
 	return (float)(get_native_time() - initial);
-}
-
-void window_reset()
-{
-	memset(window->window_fb, 0, window->width * window->height * 4);
-	window_display();
 }

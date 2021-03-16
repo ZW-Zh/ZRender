@@ -36,7 +36,6 @@ int window_init(int width, int height);
 int window_destroy();
 void window_draw(unsigned char* framebuffer);
 float platform_get_time(void);
-void window_reset();
 void msg_dispatch();
 Vec2f get_mouse_pos();
 
