@@ -13,7 +13,6 @@
 #include <cmath>
 #include "IShader.h"
 
-
 void clear_zbuffer(int width, int height, float* zbuffer)
 {
 	for (int i = 0; i < width * height; i++)
@@ -34,25 +33,6 @@ void clear_framebuffer(int width, int height, unsigned char* framebuffer)
 		}
 	}
 }
-
-struct GouraudShader : public IShader {
-	Vec3f varying_intensity; // written by vertex shader, read by fragment shader
-	Vec3f light_dir;
-	virtual Vec3f vertex(int iface, int nthvert) {
-		std::vector<VertexIndex> face = model->face(iface);
-		Vec4f gl_Vertex =Vec4f(model->vert(face[nthvert].v),1); // read the vertex from .obj file
-		gl_Vertex = Viewport * Projection * ModelView * gl_Vertex;     // transform it to screen coordinates
-		Vec3f rs_gl_Vertex = castVec3(gl_Vertex);
-		varying_intensity[nthvert] = max(0.f, model->norm_vert(face[nthvert].norm_v) * light_dir); // get diffuse lighting intensity
-		return rs_gl_Vertex;
-	}
-
-	virtual bool fragment(Vec3f bar, TGAColor& color) {
-		float intensity = varying_intensity * bar;   // interpolate intensity for the current pixel
-		color = TGAColor(255, 255, 255, 255) * intensity; // well duh
-		return false;                              // no, we do not discard this pixel
-	}
-};
 
 int main() {
 
@@ -113,16 +93,17 @@ int main() {
 		Vec3f light_dir = Vec3f(1, -1, 1).normalize();
 		Vec3f intensity;
 
-		GouraudShader shader;
+		PhoneShader shader;
 		shader.light_dir = light_dir;
 		shader.model = model;
+		shader.image = texture;
 		for (int i = 0; i < model->nfaces(); i++) {
 			Vec3f screen_coords[3];
 			for (int j = 0; j < 3; j++) {
 				screen_coords[j] = shader.vertex(i, j);
 			}
-			Triangle t(screen_coords[0], screen_coords[1], screen_coords[2]);
-			drawTriangle(framebuffer, t, shader, texture, zbuffer);
+			
+			drawTriangle(framebuffer, screen_coords[0], screen_coords[1], screen_coords[2], shader, texture, zbuffer);
 		}
 
 		window_draw(framebuffer);

@@ -250,6 +250,7 @@ struct Vertex
 	Vec3f s_v, w_v, norm_v;
 	//对应纹理坐标
 	Vec2f t_v;
+	Vertex() : s_v(Vec3f()), w_v(Vec3f()), t_v(Vec2f()), norm_v(Vec3f()) {};
 	Vertex(Vec3f s_v, Vec3f w_v, Vec2f t_v, Vec3f norm_v) : s_v(s_v), w_v(w_v), t_v(t_v), norm_v(norm_v) {};
 };
 #endif //__GEOMETRY_H__
