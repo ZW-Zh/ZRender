@@ -5,6 +5,8 @@ ZRender is a toy software rasterization application on Windows platform，just f
 * draw triangle
 * texture mapping
 * depth testing
+* phone shading
+* model transformation
 
 # output
 ## texture-mapping
@@ -13,3 +15,7 @@ ZRender is a toy software rasterization application on Windows platform，just f
 ![](https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/transform.gif)
 ## gouraud-shading
 ![](https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/gouraud-shading.png)
+
+## phone-shading
+
+![](https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/phone-shading.png)
