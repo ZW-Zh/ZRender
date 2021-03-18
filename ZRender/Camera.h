@@ -1,7 +1,7 @@
 #pragma once
 
 #include "geometry.h"
-
+#include "model.h"
 
 class Camera
 {
@@ -17,5 +17,5 @@ public:
 };
 
 //handle event
-void updata_camera_pos(Camera& camera);
-void handle_mouse_events(Camera& camera);
+void updata_camera_pos(Camera& camera,Model* model);
+void handle_mouse_events(Camera& camera, Model *model);

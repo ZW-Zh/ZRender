@@ -49,12 +49,15 @@ int main() {
 	//初始化
 	for (int i = width * height; i--; zbuffer[i] = (std::numeric_limits<float>::min)());
 
-	Vec3f light_dir = Vec3f(1, -1, 1).normalize();
+	//Vec3f light_dir = Vec3f(1, -1, 1).normalize();
 	Vec3f eye(0, 0, 3);
 	Vec3f center(0, 0, 0);
 	Vec3f up(0, 1, 0);
+	Vec3f light_pos(10, 10, 10);
 
 	Camera c(eye, center, up, 0);
+
+	PhoneShader shader;
 
 	//创建窗口
 	window_init(width, height);
@@ -87,22 +90,19 @@ int main() {
 		projection(60, width / height, -0.1, -10000);
 
 		//处理鼠标事件
-		handle_mouse_events(c);
+		handle_mouse_events(c,model);
 
-		//加入光照
-		Vec3f light_dir = Vec3f(1, -1, 1).normalize();
-		Vec3f intensity;
-
-		PhoneShader shader;
-		shader.light_dir = light_dir;
+		
+		shader.light_pos = light_pos;
 		shader.model = model;
 		shader.image = texture;
+		shader.eye = c.pos;
+		
 		for (int i = 0; i < model->nfaces(); i++) {
 			Vec3f screen_coords[3];
 			for (int j = 0; j < 3; j++) {
 				screen_coords[j] = shader.vertex(i, j);
 			}
-			
 			drawTriangle(framebuffer, screen_coords[0], screen_coords[1], screen_coords[2], shader, texture, zbuffer);
 		}
 

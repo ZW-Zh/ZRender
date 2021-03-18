@@ -107,8 +107,8 @@ void drawTriangle(unsigned char* framebuffer, Vec3f v0, Vec3f v1, Vec3f v2, ISha
 			//加入材质
 			float z = 0;
 			TGAColor color;
-			//对世界坐标的深度值进行插值
-			//屏幕空间的z保留的世界坐标下的z
+			
+			//mvp变换后，视口变换没有改变z
 			z = v0.z * bc[0] + v1.z * bc[1] + v2.z * bc[2];
 
 			if (zbuffer[int(i + j * width)] < z) {
