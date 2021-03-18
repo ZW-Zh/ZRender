@@ -51,7 +51,7 @@ struct GouraudShader : public IShader {
 	}
 };
 
-struct PhoneShader : public IShader {
+struct PhongShader : public IShader {
 	Vec3f eye;
 	Vec3f light_pos;
 	TGAImage image;

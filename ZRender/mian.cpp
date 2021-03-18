@@ -57,7 +57,7 @@ int main() {
 
 	Camera c(eye, center, up, 0);
 
-	PhoneShader shader;
+	PhongShader shader;
 
 	//创建窗口
 	window_init(width, height);

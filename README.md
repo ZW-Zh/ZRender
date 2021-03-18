@@ -5,17 +5,20 @@ ZRender is a toy software rasterization application on Windows platform，just f
 * draw triangle
 * texture mapping
 * depth testing
-* phone shading
+* phong shading
 * model transformation
 
 # output
 ## texture-mapping
-![](https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/texture-mapping.png)
+<img width="200" height="200" src="https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/texture-mapping.png"/>
+
 ## transformation
-![](https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/transform.gif)
+<img width="200" height="200" src="https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/transform.gif"/>
+
 ## gouraud-shading
-![](https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/gouraud-shading.png)
+<img width="200" height="200" src="https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/gouraud-shading.png"/>
 
-## phone-shading
+## phong-shading
 
-![](https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/phone-shading.png)
+<img width="200" height="200" src="https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/phong-shading.png"/>
+
