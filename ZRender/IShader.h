@@ -88,9 +88,9 @@ struct PhongShader : public IShader {
 		
 		light l1;
 		l1.pos = light_pos;
-		l1.intensity.x = 300;
-		l1.intensity.y = 300;
-		l1.intensity.z = 300;
+		l1.intensity.x = 200;
+		l1.intensity.y = 200;
+		l1.intensity.z = 200;
 		TGAColor texture = image.get(x, y);
 		
 		Vec3f ka = Vec3f(0.025, 0.025, 0.025);

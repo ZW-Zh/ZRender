@@ -57,7 +57,7 @@ void updata_camera_pos(Camera& camera, Model* model)
 	float y_delta = window->mouse_info.orbit_delta[1] / window->height;
 
 	//// for mouse wheel
-	//distance *= pow(0.95, window->mouse_info.wheel_delta);
+	distance *= pow(0.95, window->mouse_info.wheel_delta);
 	// 
 	////加上位移的
 	//float factor = 1.5 * PI;
@@ -73,9 +73,9 @@ void updata_camera_pos(Camera& camera, Model* model)
 	if (theta < -PI / 2)  theta = -PI/2;*/
 
 	////先水平旋转在垂直旋转，x和z都会变
-	/*camera.pos[1] = camera.target[1] + distance * sin(theta);
-	camera.pos[0] = camera.target[0] + distance * cos(theta) * sin(phi);
-	camera.pos[2] = camera.target[2] + distance * cos(theta) * cos(phi);*/
+	//camera.pos[1] = camera.target[1] + distance * sin(theta);
+	//camera.pos[0] = camera.target[0] + distance * cos(theta) * sin(phi);
+	camera.pos[2] = camera.target[2] + distance ;
 
 	
 	for (auto i = model->verts_.begin(); i != model->verts_.end(); ++i) {
