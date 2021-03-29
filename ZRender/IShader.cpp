@@ -65,10 +65,10 @@ void projection(float fovY, float aspect, float n, float f) {
 }
 
 
-Vec3f barycentric(Vec3f v0, Vec3f v1, Vec3f v2, Vec2i P)
+Vec3f barycentric(Triangle& t, Vec2i P)
 {
 	//叉乘
-	Vec3f u = cross(Vec3f(v2.x - v0.x,v1.x - v0.x, v0.x - P[0]), Vec3f(v2.y - v0.y, v1.y -v0.y, v0.y - P[1]));
+	Vec3f u = cross(Vec3f(t.p2.s_v.x - t.p0.s_v.x,t.p1.s_v.x - t.p0.s_v.x, t.p0.s_v.x - P[0]), Vec3f(t.p2.s_v.y - t.p0.s_v.y, t.p1.s_v.y - t.p0.s_v.y, t.p0.s_v.y - P[1]));
 	/* `pts` and `P` has integer value as coordinates
 	   so `abs(u[2])` < 1 means `u[2]` is 0, that means
 	   triangle is degenerate, in this case return something with negative coordinates */
@@ -90,16 +90,16 @@ Vec3f barycentric(Vec3f v0, Vec3f v1, Vec3f v2, Vec2i P)
 	return { c1, c2, c3 };*/
 }
 
-void drawTriangle(unsigned char* framebuffer, Vec3f v0, Vec3f v1, Vec3f v2, IShader& shader, TGAImage& image, float* zbuffer)
+void drawTriangle(unsigned char* framebuffer, Triangle& t, IShader& shader, TGAImage& image, float* zbuffer)
 {
 	//屏幕空间包围盒
-	float min_x = std::max(0.f, std::min(std::min(v0.x, v1.x), v2.x));
-	float max_x = std::min((float)width, std::max(std::max(v0.x, v1.x), v2.x));
-	float min_y = std::max(0.f, std::min(std::min(v0.y, v1.y), v2.y));
-	float max_y = std::min((float)height, std::max(std::max(v0.y, v1.y), v2.y));
+	float min_x = std::max(0.f, std::min(std::min(t.p0.s_v.x, t.p1.s_v.x), t.p2.s_v.x));
+	float max_x = std::min((float)width, std::max(std::max(t.p0.s_v.x, t.p1.s_v.x), t.p2.s_v.x));
+	float min_y = std::max(0.f, std::min(std::min(t.p0.s_v.y, t.p1.s_v.y), t.p2.s_v.y));
+	float max_y = std::min((float)height, std::max(std::max(t.p0.s_v.y, t.p1.s_v.y), t.p2.s_v.y));
 	for (int i = min_x; i <= max_x; i++) {
 		for (int j = min_y; j <= max_y; j++) {
-			Vec3f bc = barycentric(v0, v1, v2, Vec2i(i, j));
+			Vec3f bc = barycentric(t, Vec2i(i, j));
 			//坐标在三角形外
 			if (bc.x < 0 || bc.y < 0 || bc.z < 0) continue;
 
@@ -109,12 +109,19 @@ void drawTriangle(unsigned char* framebuffer, Vec3f v0, Vec3f v1, Vec3f v2, ISha
 			TGAColor color;
 			
 			//mvp变换后，视口变换没有改变z
-			z = v0.z * bc[0] + v1.z * bc[1] + v2.z * bc[2];
 
+			//透视插值矫正
+			z = 1.0 / (bc[0] / t.p0.s_v.z + bc[1] / t.p1.s_v.z + bc[2] / t.p2.s_v.z);
+ 			float z1 = t.p0.s_v.z * bc[0] + t.p1.s_v.z * bc[1] + t.p2.s_v.z * bc[2];
+
+			bc[0] *= z / t.p0.s_v.z;
+			bc[1] *= z / t.p1.s_v.z;
+			bc[2] *= z / t.p2.s_v.z;
+			
 			if (zbuffer[int(i + j * width)] < z) {
 				//更新深度
 				zbuffer[int(i + j * width)] = z;
-				bool discard = shader.fragment(bc, color);
+				bool discard = shader.fragment(bc,z, color);
 				if (!discard) {
 					set_color(framebuffer, i, j, color);
 				}

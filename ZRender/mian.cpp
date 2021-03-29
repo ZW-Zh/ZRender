@@ -99,11 +99,12 @@ int main() {
 		shader.eye = c.pos;
 		
 		for (int i = 0; i < model->nfaces(); i++) {
-			Vec3f screen_coords[3];
+			Triangle t;
 			for (int j = 0; j < 3; j++) {
-				screen_coords[j] = shader.vertex(i, j);
+				shader.vertex(i, j);
 			}
-			drawTriangle(framebuffer, screen_coords[0], screen_coords[1], screen_coords[2], shader, texture, zbuffer);
+			t = shader.t;
+			drawTriangle(framebuffer, t, shader, texture, zbuffer);
 		}
 
 		window_draw(framebuffer);

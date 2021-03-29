@@ -20,11 +20,11 @@ struct IShader {
 	virtual ~IShader();
 	//iface:面索引 nthvert:面中顶点索引,返回屏幕坐标
 	virtual Vec3f vertex(int iface, int nthvert) = 0;
-	//bar:重心坐标，返回屏幕坐标颜色
-	virtual bool fragment(Vec3f bar, TGAColor& color) = 0;
+	//bar:重心坐标，插值深度，返回屏幕坐标颜色
+	virtual bool fragment(Vec3f bar,float z,TGAColor& color) = 0;
 };
 
-void drawTriangle(unsigned char* framebuffer, Vec3f v0, Vec3f v1, Vec3f v2, IShader& shader, TGAImage& image, float* zbuffer);
+void drawTriangle(unsigned char* framebuffer, Triangle& t, IShader& shader, TGAImage& image, float* zbuffer);
 
 struct light {
 	Vec3f pos;
@@ -44,7 +44,7 @@ struct GouraudShader : public IShader {
 		return rs_gl_Vertex;
 	}
 
-	virtual bool fragment(Vec3f bar, TGAColor& color) {
+	virtual bool fragment(Vec3f bar, float z, TGAColor& color) {
 		float intensity = varying_intensity * bar;   // interpolate intensity for the current pixel
 		color = TGAColor(255, 255, 255, 255) * intensity; // well duh
 		return false;                              // no, we do not discard this pixel
@@ -79,10 +79,10 @@ struct PhongShader : public IShader {
 		return rs_gl_Vertex;
 	}
 
-	virtual bool fragment(Vec3f bar, TGAColor& color) {
+	virtual bool fragment(Vec3f bar, float z, TGAColor& color) {
 		float x = (t.p0.t_v.x * bar.x + t.p1.t_v.x * bar.y + t.p2.t_v.x * bar.z) * image.get_width();
 		float y = image.get_height() - (t.p0.t_v.y * bar.x + t.p1.t_v.y * bar.y + t.p2.t_v.y * bar.z) * image.get_height();
-
+		
 		Vec3f world_coord = t.p0.w_v * bar.x + t.p1.w_v * bar.y + t.p2.w_v * bar.z;
 		Vec3f normal = t.p0.norm_v * bar.x + t.p1.norm_v * bar.y + t.p2.norm_v * bar.z;
 		
