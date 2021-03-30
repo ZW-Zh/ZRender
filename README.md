@@ -24,6 +24,9 @@ ZRender is a toy software rasterization application on Windows platform，just f
 
 ##  Perspective-Correct Interpolation
 
-```
-![](https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/wrong.png "wrong") ![](https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/right.png "right")
+```html
+<p float="left">
+  <img src="https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/wrong.png" width="200" />
+  <img src="https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/right.png" width="200" /> 
+</p>
 ```
