@@ -248,10 +248,12 @@ struct Vertex
 {
 	//屏幕顶点坐标，世界坐标
 	Vec3f s_v, w_v, norm_v;
+	//mvp变换后顶点坐标
+	Vec4f gl_v;
 	//对应纹理坐标
 	Vec2f t_v;
-	Vertex() : s_v(Vec3f()), w_v(Vec3f()), t_v(Vec2f()), norm_v(Vec3f()) {};
-	Vertex(Vec3f s_v, Vec3f w_v, Vec2f t_v, Vec3f norm_v) : s_v(s_v), w_v(w_v), t_v(t_v), norm_v(norm_v) {};
+	Vertex() : s_v(Vec3f()), w_v(Vec3f()), t_v(Vec2f()), norm_v(Vec3f()),gl_v(Vec4f()) {};
+	Vertex(Vec3f s_v, Vec3f w_v, Vec2f t_v, Vec3f norm_v,Vec4f gl_v) : s_v(s_v), w_v(w_v), t_v(t_v), norm_v(norm_v), gl_v(gl_v) {};
 };
 #endif //__GEOMETRY_H__
 

@@ -22,3 +22,8 @@ ZRender is a toy software rasterization application on Windows platform，just f
 
 <img width="200" height="200" src="https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/phong-shading.png"/>
 
+##  Perspective-Correct Interpolation
+
+<figure class="third">     
+    <img src="https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/wrong.png" width="200" height="200"/><img src="https://github.com/ZW-Zh/ZRender/blob/master/ZRender/output/right" width="200" height="200"/>
+</figure>

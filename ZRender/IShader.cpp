@@ -17,11 +17,11 @@ void viewport(int w, int h) {
 	Viewport = Matrix::identity();
 	Viewport[0][3] = w / 2.f;
 	Viewport[1][3] = h / 2.f;
-	Viewport[2][3] = depth / 2.f;
+	//Viewport[2][3] = depth / 2.f;
 
 	Viewport[0][0] = w / 2.f;
 	Viewport[1][1] = h / 2.f;
-	Viewport[2][2] = depth / 2.f;
+	//Viewport[2][2] = depth / 2.f;
 }
 
 void projection(float fovY, float aspect, float n, float f) {
@@ -105,19 +105,19 @@ void drawTriangle(unsigned char* framebuffer, Triangle& t, IShader& shader, TGAI
 
 			//加入计算深度
 			//加入材质
-			float z = 0;
+			
 			TGAColor color;
 			
 			//mvp变换后，视口变换没有改变z
 
 			//透视插值矫正
-			z = 1.0 / (bc[0] / t.p0.s_v.z + bc[1] / t.p1.s_v.z + bc[2] / t.p2.s_v.z);
- 			float z1 = t.p0.s_v.z * bc[0] + t.p1.s_v.z * bc[1] + t.p2.s_v.z * bc[2];
+			float z = 1.0 / (bc[0] / t.p0.gl_v.w + bc[1] / t.p1.gl_v.w + bc[2] / t.p2.gl_v.w);
+ 			//float z1 = t.p0.s_v.z * bc[0] + t.p1.s_v.z * bc[1] + t.p2.s_v.z * bc[2];
 
-			bc[0] *= z / t.p0.s_v.z;
-			bc[1] *= z / t.p1.s_v.z;
-			bc[2] *= z / t.p2.s_v.z;
-			
+			bc[0] *= z / t.p0.gl_v.w;
+			bc[1] *= z / t.p1.gl_v.w;
+			bc[2] *= z / t.p2.gl_v.w;
+
 			if (zbuffer[int(i + j * width)] < z) {
 				//更新深度
 				zbuffer[int(i + j * width)] = z;

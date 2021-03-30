@@ -36,9 +36,9 @@ void clear_framebuffer(int width, int height, unsigned char* framebuffer)
 
 int main() {
 
-	Model* model = new Model("obj/african_head.obj");
+	Model* model = new Model("obj/test.obj");
 	TGAImage texture;
-	texture.read_tga_file("obj/african_head_diffuse.tga");
+	texture.read_tga_file("obj/test.tga");
 	//帧缓冲
 	unsigned char* framebuffer = (unsigned char*)malloc(sizeof(unsigned char) * width * height * 4);
 	assert(framebuffer != nullptr);

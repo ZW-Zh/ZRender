@@ -63,6 +63,7 @@ struct PhongShader : public IShader {
 		Vec3f world_coord = model->vert(face[nthvert].v);
 		Vec4f gl_Vertex = Vec4f(world_coord, 1); // read the vertex from .obj file
 		gl_Vertex = Viewport * Projection * ModelView * gl_Vertex;     // transform it to screen coordinates
+		//w分量是z值
 		Vec3f rs_gl_Vertex = castVec3(gl_Vertex);
 		
 		/*Vec4f light = Vec4f(light_pos, 1);
@@ -74,6 +75,7 @@ struct PhongShader : public IShader {
 		v.s_v = rs_gl_Vertex;
 		v.t_v = model->texture_vert(face[nthvert].t_v);
 		v.w_v = world_coord;
+		v.gl_v = gl_Vertex;
 		t.addVertex(v);
 
 		return rs_gl_Vertex;
@@ -81,7 +83,7 @@ struct PhongShader : public IShader {
 
 	virtual bool fragment(Vec3f bar, float z, TGAColor& color) {
 		float x = (t.p0.t_v.x * bar.x + t.p1.t_v.x * bar.y + t.p2.t_v.x * bar.z) * image.get_width();
-		float y = image.get_height() - (t.p0.t_v.y * bar.x + t.p1.t_v.y * bar.y + t.p2.t_v.y * bar.z) * image.get_height();
+		float y = (t.p0.t_v.y * bar.x + t.p1.t_v.y * bar.y + t.p2.t_v.y * bar.z) * image.get_height();
 		
 		Vec3f world_coord = t.p0.w_v * bar.x + t.p1.w_v * bar.y + t.p2.w_v * bar.z;
 		Vec3f normal = t.p0.norm_v * bar.x + t.p1.norm_v * bar.y + t.p2.norm_v * bar.z;
